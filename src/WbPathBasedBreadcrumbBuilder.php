@@ -7,6 +7,7 @@
 
 namespace Drupal\wb_breadcrumbs;
 
+use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -79,8 +80,16 @@ class WbPathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       array('callable' => 'menu.default_tree_manipulators:generateIndexAndSort'),
     );
     $tree = $menu_tree->transform($tree, $manipulators);
-    $link = $this->linksFromTree($tree);
-    return $link;
+    $links = array_merge(
+      [Link::createFromRoute($this->t('Home'), '<front>')],
+      $this->linksFromTree($tree)
+    );
+
+    // Generate Breadcrumb object
+    $breadcrumb = new Breadcrumb();
+    $breadcrumb->setLinks($links);
+    $breadcrumb->addCacheContexts(['route']);
+    return $breadcrumb;
   }
 
   /**
